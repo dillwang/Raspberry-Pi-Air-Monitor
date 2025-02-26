@@ -82,6 +82,20 @@ Optimal humidity levels (between 40% and 60%) promote a healthier indoor environ
 | Power Supply and Cables            | 1 set    | $10              |
 | **Total**                          |          | **~$165**        |
 
+## **Purchase List**
+* item MQ-135: Hazardous Gas Detection Module
+* item PMS5003: PM2.5/PM10 Sensor
+* item DHT11: Temperature \& Humidity Sensor
+* item KY-009: 3-color SMD LED
+* item KY-006: Passive Buzzer
+* item I2C LCD2004: I2C LCD Display Module
+
+## Reference
+* [https://pinout.xyz/pinout/i2c](https://pinout.xyz/pinout/i2c)
+* [https://www.sunfounder.com/products/i2c-lcd2004-module](https://www.sunfounder.com/products/i2c-lcd2004-module)
+* [http://wiki.sunfounder.cc/index.php?title=I2C_LCD2004](http://wiki.sunfounder.cc/index.php?title=I2C_LCD2004)
+
+
 ## **License**
 This project is open-source and available under the MIT License.
 
