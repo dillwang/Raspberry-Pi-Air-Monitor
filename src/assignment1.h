@@ -9,6 +9,7 @@ Date:
 #define _ASSIGNMENT_BODY_
 
 #include <stdint.h>
+#include "workload.h"
 
 // Macros
 #define TURN_ON(pin) digitalWrite(pin, 1)
@@ -65,6 +66,12 @@ Date:
 
 typedef struct shared_variable {
     int bProgramExit; // Once set to 1, the program will terminate.
+    float temperature;
+    float humidity;
+    int button;
+    int buzzerOn;
+    int flameOn;
+
 
 
 } SharedVariable;
