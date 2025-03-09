@@ -10,6 +10,10 @@ Date:
 #include <wiringPi.h>
 #include <softPwm.h>
 #include <softTone.h>
+#include <dht.h>
+#include "MQ135.h"
+
+MQ135 gasSensor = MQ135(PIN_HAZA_GAS);
 
 
 void init_shared_variable(SharedVariable* sv) {
@@ -50,8 +54,9 @@ void init_sensors(SharedVariable* sv) {
 
 // 1. Hazardous gas sensor
 void body_haza_gas(SharedVariable *sv)
-{
-
+{   
+    float ppm = gasSensor.getPPM();
+    
 }
 
 // 2. PM2.5/PM10 sensor
@@ -63,19 +68,21 @@ void body_PM25(SharedVariable *sv)
 // 3. DHT11 temperature& humidity sensor
 void body_temp_hum(SharedVariable *sv)
 {
-
+    int temp_hum = DHT.read11(PIN_TEMP_HUM);
+    sv->humidity = DHT.humidity;
+    sv->temperature = DHT.temperature;
 }
 
 // 4. Flame sensor
 void body_flame(SharedVariable *sv)
 {
-
+    sv->flameOn = READ(PIN_FLAME);
 }
 
 // 5. SMD RGB LED (Surface Mount Device)
 void body_rgbcolor(SharedVariable *sv)
 {
-
+    
 }
 
 // 6. Passive Buzzer
