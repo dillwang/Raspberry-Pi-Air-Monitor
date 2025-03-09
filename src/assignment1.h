@@ -40,7 +40,7 @@ Date:
 // Total: 8 sensors
 
 // 1. Hazardous gas sensor
-#define PIN_HAZA_GAS 8
+#define PIN_HAZA_GAS 0
 
 // 2. PM2.5/PM10 sensor
 #define PIN_PM25
