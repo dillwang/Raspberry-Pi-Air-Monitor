@@ -42,7 +42,8 @@ Date:
 #define PIN_HAZA_GAS 0
 
 // 2. PM2.5/PM10 sensor
-#define PIN_PM25
+#define PIN_PM25_RXD 16
+#define PIN_PM25_TXD 15
 
 // 3. DHT11 temperature& humidity sensor
 #define PIN_TEMP_HUM 9
