@@ -65,8 +65,8 @@ Date:
 
 typedef struct shared_variable {
     int bProgramExit; // Once set to 1, the program will terminate.
-    float temperature;
-    float humidity;
+    int temperature;
+    int humidity;
     int button;
     int buzzerOn;
     int flameOn;

@@ -14,7 +14,7 @@ Date:
 //#include "MQ135.h"
 
 //MQ135 gasSensor = MQ135(PIN_HAZA_GAS);
-
+#define MAX_TIMINGS 85
 
 void init_shared_variable(SharedVariable* sv) {
     sv->bProgramExit = 0;
@@ -69,11 +69,9 @@ void body_PM25(SharedVariable *sv)
 // 3. DHT11 temperature& humidity sensor
 void body_temp_hum(SharedVariable *sv)
 {
-    /*
-    int temp_hum = DHT.read11(PIN_TEMP_HUM);
-    sv->humidity = DHT.humidity;
-    sv->temperature = DHT.temperature;
-    */
+
+    int success = readDHT11(PIN_TEMP_HUM, sv->temperature, sv->humidity);
+    printf("the operation was %d, temperature is %d, humidity is %d", success, sv->temperature, sv->humidity);
 }
 
 // 4. Flame sensor
@@ -133,4 +131,63 @@ void body_button(SharedVariable *sv)
     }
 
     lastRead = buttonRead;
+}
+
+
+
+// Reads data from a DHT11 sensor connected to 'pin'.
+// On success, fills in temperature and humidity and returns 1.
+// On failure, returns 0.
+int readDHT11(int pin, int *temperature, int *humidity) {
+    int data[5] = {0, 0, 0, 0, 0};
+    int lastState = HIGH;
+    int counter = 0;
+    int j = 0;
+
+    // Step 1. Send start signal: pull the pin LOW for at least 18ms.
+    pinMode(pin, OUTPUT);
+    digitalWrite(pin, LOW);
+    delay(18); // 18ms delay
+
+    // Step 2. Pull pin HIGH for 40 microseconds.
+    digitalWrite(pin, HIGH);
+    delayMicroseconds(40);
+
+    // Step 3. Set pin to input mode to read the sensor response.
+    pinMode(pin, INPUT);
+
+    // Read the timings for each bit.
+    for (int i = 0; i < MAX_TIMINGS; i++) {
+        counter = 0;
+        while (digitalRead(pin) == lastState) {
+            counter++;
+            delayMicroseconds(1);
+            if (counter == 255)
+                break;
+        }
+        lastState = digitalRead(pin);
+
+        // The first few transitions are part of the sensor's response signal.
+        if (i >= 4 && (i % 2 == 0)) {
+            data[j/8] <<= 1;
+            // If the high pulse was long, it's a 1; if short, it's a 0.
+            if (counter > 30)
+                data[j/8] |= 1;
+            j++;
+        }
+    }
+
+    // We should have received 40 bits (5 bytes) of data.
+    if (j >= 40) {
+        int checksum = data[0] + data[1] + data[2] + data[3];
+        if ((checksum & 0xFF) == data[4]) {
+            *humidity = data[0];      // Integral part of humidity.
+            *temperature = data[2];   // Integral part of temperature.
+            return 1;
+        } else {
+            // Checksum failed.
+            return 0;
+        }
+    }
+    return 0;
 }
