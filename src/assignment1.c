@@ -10,10 +10,10 @@ Date:
 #include <wiringPi.h>
 #include <softPwm.h>
 #include <softTone.h>
-#include <dht.h>
-#include "MQ135.h"
+//#include <dht.h>
+//#include "MQ135.h"
 
-MQ135 gasSensor = MQ135(PIN_HAZA_GAS);
+//MQ135 gasSensor = MQ135(PIN_HAZA_GAS);
 
 
 void init_shared_variable(SharedVariable* sv) {
@@ -46,7 +46,7 @@ void init_sensors(SharedVariable* sv) {
     pinMode(PIN_FLAME, INPUT);
     pinMode(PIN_TEMP_HUM, INPUT);
     pinMode(PIN_HAZA_GAS, INPUT);
-    pinMode(PIN_PM25, INPUT);
+    //pinMode(PIN_PM25, INPUT);
     pinMode(PIN_BUTTON, INPUT);
     pinMode(PIN_BUTTON, INPUT);
 
@@ -55,7 +55,7 @@ void init_sensors(SharedVariable* sv) {
 // 1. Hazardous gas sensor
 void body_haza_gas(SharedVariable *sv)
 {   
-    float ppm = gasSensor.getPPM();
+    //float ppm = gasSensor.getPPM();
     
 }
 
@@ -68,9 +68,11 @@ void body_PM25(SharedVariable *sv)
 // 3. DHT11 temperature& humidity sensor
 void body_temp_hum(SharedVariable *sv)
 {
+    /*
     int temp_hum = DHT.read11(PIN_TEMP_HUM);
     sv->humidity = DHT.humidity;
     sv->temperature = DHT.temperature;
+    */
 }
 
 // 4. Flame sensor
@@ -88,6 +90,7 @@ void body_rgbcolor(SharedVariable *sv)
 // 6. Passive Buzzer
 void body_buzzer(SharedVariable *sv)
 {
+    /*
     if (sv->button == RUNNING) {
         if(sv->buzzerOn == 1) {
             unsigned long curTime = millis();
@@ -105,6 +108,7 @@ void body_buzzer(SharedVariable *sv)
             }
         }
     }
+    */
 }
 
 // 7. LCD display

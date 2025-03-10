@@ -9,7 +9,6 @@ Date:
 #define _ASSIGNMENT_BODY_
 
 #include <stdint.h>
-#include "workload.h"
 
 // Macros
 #define TURN_ON(pin) digitalWrite(pin, 1)
@@ -96,7 +95,7 @@ void body_temp_hum(SharedVariable *sv);
 void body_flame(SharedVariable *sv);
 void body_rgbcolor(SharedVariable *sv);
 void body_buzzer(SharedVariable *sv); 
-void body_display(SharedVariable *sv)
+void body_display(SharedVariable *sv);
 void body_button(SharedVariable *sv);
 
 #endif
