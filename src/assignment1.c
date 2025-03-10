@@ -19,12 +19,15 @@ Date:
 #define MAX_TIMINGS 85
 #define SERIAL_PORT "/dev/ttyAMA0" // UART Serial Port on Raspberry Pi
 
-    void init_shared_variable(SharedVariable *sv)
+void init_shared_variable(SharedVariable *sv)
 {
     sv->bProgramExit = 0;
     sv->temperature = 0;
     sv->humidity = 0;
-    sv->button = RUNNING;
+    sv->pm1_0 = 0;
+    sv->pm2_5 = 0;
+    sv->pm10 = 0;
+    sv->button = PAUSE;
     sv->buzzerOn = 0;
 }
 
@@ -37,26 +40,31 @@ void ledInit(void) {
 
 void init_sensors(SharedVariable* sv) {
     //output pins
-    ledInit();
+    //ledInit();
     softToneCreate(PIN_BUZZER);
-
+        
+    pinMode(PIN_SMD_RED, OUTPUT);
+    pinMode(PIN_SMD_BLU, OUTPUT);
+    pinMode(PIN_SMD_GRN, OUTPUT);
+    
     //input pins
     pinMode(PIN_FLAME, INPUT);
     pinMode(PIN_TEMP_HUM, INPUT);
     pinMode(PIN_HAZA_GAS, INPUT);
     pinMode(PIN_BUTTON, INPUT);
     pinMode(PIN_BUTTON, INPUT);
+
+    
 }
 // -------- Helper Functions --------
 
-void read_pms5003(int fd)
+void read_pms5003(int fd, int *sv_pm1_0, int *sv_pm2_5, int *sv_pm10)
 {
     unsigned char buffer[32];
     
     //printf("serialdata: %d\n", serialDataAvail(fd));
 
     int stop = 0;
-    
     while (stop == 0)
     {
         if (serialDataAvail(fd) >= 32)
@@ -73,10 +81,15 @@ void read_pms5003(int fd)
                 int pm2_5 = (buffer[6] << 8) | buffer[7];
                 int pm10 = (buffer[8] << 8) | buffer[9];
 
-                printf("2. PM1.0: %d µg/m³, PM2.5: %d µg/m³, PM10: %d µg/m³\n", pm1_0, pm2_5, pm10);
+                *sv_pm1_0 = pm1_0;
+                *sv_pm2_5 = pm2_5;
+                *sv_pm10 = pm10;
+
                 stop ++;
             }
         }
+        //only run once
+        //stop ++;
     }
 }
 
@@ -158,7 +171,8 @@ void body_PM25(SharedVariable *sv)
     }
 
     //printf("Reading MS5003 sensor data...\n");
-    read_pms5003(fd);
+    read_pms5003(fd, &sv->pm1_0, &sv->pm2_5, &sv->pm10);
+    printf("2. PM1.0: %d µg/m³, PM2.5: %d µg/m³, PM10: %d µg/m³\n", sv->pm1_0, sv->pm2_5, sv->pm10);
 
     // Close serial port
     serialClose(fd);
@@ -176,36 +190,61 @@ void body_temp_hum(SharedVariable *sv)
 void body_flame(SharedVariable *sv)
 {
     sv->flameOn = READ(PIN_FLAME);
+    printf("4. flame detection value: %d\n", sv->flameOn);
 }
 
 // 5. SMD RGB LED (Surface Mount Device)
 void body_rgbcolor(SharedVariable *sv)
 {
-    
+    // Air quality: green
+    if (sv->pm2_5 < 10)
+    {
+        WRITE(PIN_SMD_RED, 0x80);
+        WRITE(PIN_SMD_GRN, 0xff);
+        WRITE(PIN_SMD_BLU, 0x00);
+        printf("5. SMD RGB LED: green\n");
+    }
+
+    // Air quality: yellow
+    else if (sv->pm2_5 < 35)
+    {
+        WRITE(PIN_SMD_RED, 0x00);
+        WRITE(PIN_SMD_GRN, 0x00);
+        WRITE(PIN_SMD_BLU, 0xFF);
+        printf("5. SMD RGB LED: blue\n");
+    }
+
+    else if (sv->pm2_5 < 55)
+    {
+        WRITE(PIN_SMD_RED, 0xFF);
+        WRITE(PIN_SMD_GRN, 0xA0);
+        WRITE(PIN_SMD_BLU, 0x00);
+        printf("5. SMD RGB LED: yellow\n");
+    }
+
+    else
+    {
+        WRITE(PIN_SMD_RED, 0xFF);
+        WRITE(PIN_SMD_GRN, 0x00);
+        WRITE(PIN_SMD_BLU, 0x00);
+        printf("5. SMD RGB LED: red\n");
+    }
+
 }
 
 // 6. Passive Buzzer
 void body_buzzer(SharedVariable *sv)
 {
-    /*
+
     if (sv->button == RUNNING) {
-        if(sv->buzzerOn == 1) {
-            unsigned long curTime = millis();
-            if (curTime - sv->buzzerTime < 3000) {
-                int newTone = 3000 - (curTime - sv->buzzerTime);
-                if (newTone % 100 > 50) {
-                    newTone = 1000;
-                } else {
-                    newTone = 1500;
-                }
-                softToneWrite(PIN_BUZZER, newTone);
-            } else {
-                softToneWrite(PIN_BUZZER, 0);
-                sv->buzzerOn = 0;
-            }
-        }
+        softToneWrite(PIN_BUZZER, 0);
+        printf("6. Buzzer On\n");
     }
-    */
+    else{
+        softToneWrite(PIN_BUZZER, 0);
+        printf("6. Buzzer off\n");
+    }
+
 }
 
 // 7. LCD display
@@ -223,9 +262,12 @@ void body_button(SharedVariable *sv)
     if (lastRead == LOW && buttonRead == HIGH) {
         if (sv->button == RUNNING) {
             sv->button = PAUSE;
+            printf("8. Button pressed: PAUSE\n");
         } else {
             sv->button = RUNNING;
+            printf("8. Button pressed: RUNNING\n");
         }
+
     }
 
     lastRead = buttonRead;

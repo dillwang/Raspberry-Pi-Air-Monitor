@@ -68,11 +68,12 @@ typedef struct shared_variable {
     int bProgramExit; // Once set to 1, the program will terminate.
     int temperature;
     int humidity;
+    int pm1_0;
+    int pm2_5;
+    int pm10;
     int button;
     int buzzerOn;
     int flameOn;
-
-
 
 } SharedVariable;
 
