@@ -56,8 +56,8 @@ void init_sensors(SharedVariable* sv) {
 void body_haza_gas(SharedVariable *sv)
 {   
     //float ppm = gasSensor.getPPM();
-    float ppm = READ(PIN_HAZA_GAS);
-    printf("the gas value is %f", ppm);
+    int ppm = READ(PIN_HAZA_GAS);
+    printf("the gas value is %d", ppm);
 }
 
 // 2. PM2.5/PM10 sensor
