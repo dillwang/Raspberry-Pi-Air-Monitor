@@ -14,8 +14,6 @@ Date: 3/11/2025
 #include <wiringPi.h>
 #include <softPwm.h>
 #include <softTone.h>
-//#include <dht.h>
-//#include "MQ135.h"
 
 #include <wiringSerial.h>
 #include <unistd.h>
@@ -66,6 +64,8 @@ void init_sensors(SharedVariable* sv) {
 }
 // -------- Helper Functions --------
 
+//Reads pms5003 for air quality data
+//Stores at sv
 void read_pms5003(int fd, int *sv_pm1_0, int *sv_pm2_5, int *sv_pm10)
 {
     unsigned char buffer[32];
@@ -101,25 +101,24 @@ void read_pms5003(int fd, int *sv_pm1_0, int *sv_pm2_5, int *sv_pm10)
     }
 }
 
-// Reads data from a DHT11 sensor connected to 'pin'.
-// On success, fills in temperature and humidity and returns 1.
-// On failure, returns 0.
+//Reads data from DHT11 sensor
+//If success, fills in temperature and humidity and returns 1.
+//If failure, returns 0.
 int readDHT11(int pin, int *temperature, int *humidity) {
     int data[5] = {0, 0, 0, 0, 0};
     int lastState = HIGH;
     int counter = 0;
     int j = 0;
 
-    // Step 1. Send start signal: pull the pin LOW for at least 18ms.
+    //pull the pin LOW for 18ms.
     pinMode(pin, OUTPUT);
     digitalWrite(pin, LOW);
-    delay(18); // 18ms delay
+    delay(18);
 
-    // Step 2. Pull pin HIGH for 40 microseconds.
+    //pull pin HIGH for 40 ms
     digitalWrite(pin, HIGH);
     delayMicroseconds(40);
 
-    // Step 3. Set pin to input mode to read the sensor response.
     pinMode(pin, INPUT);
 
     // Read the timings for each bit.
@@ -133,25 +132,23 @@ int readDHT11(int pin, int *temperature, int *humidity) {
         }
         lastState = digitalRead(pin);
 
-        // The first few transitions are part of the sensor's response signal.
         if (i >= 4 && (i % 2 == 0)) {
             data[j/8] <<= 1;
-            // If the high pulse was long, it's a 1; if short, it's a 0.
             if (counter > 30)
                 data[j/8] |= 1;
             j++;
         }
     }
 
-    // We should have received 40 bits (5 bytes) of data.
+    //should have received 40 bits
     if (j >= 40) {
         int checksum = data[0] + data[1] + data[2] + data[3];
         if ((checksum & 0xFF) == data[4]) {
-            *humidity = data[0];      // Integral part of humidity.
-            *temperature = data[2];   // Integral part of temperature.
+            *humidity = data[0];
+            *temperature = data[2];
             return 1;
         } else {
-            // Checksum failed.
+            // checksum failed
             return 0;
         }
     }
@@ -212,7 +209,7 @@ void body_flame(SharedVariable *sv)
     printf("4. flame detection value: %d\n", flame);
 }
 
-// 5. SMD RGB LED (Surface Mount Device)
+// 5. SMD RGB LED
 void body_rgbcolor(SharedVariable *sv)
 {
     // Air quality: green
