@@ -162,6 +162,14 @@ void body_haza_gas(SharedVariable *sv)
 {   
     int ppm = READ(PIN_HAZA_GAS);
 
+    //invert the reading, since 1 means no hazardous gas
+    if (ppm == 1){
+        ppm = 0;
+    }
+    else{
+        ppm = 1;
+    }
+
     if (ppm == LOW)
     {
         sv->gasOn = HIGH;
@@ -193,7 +201,7 @@ void body_PM25(SharedVariable *sv)
 void body_temp_hum(SharedVariable *sv)
 {
     int success = readDHT11(PIN_TEMP_HUM, &sv->temperature, &sv->humidity);
-    printf("3. temperature is %d, humidity is %d \n", sv->temperature, sv->humidity);
+    printf("3. Temperature: %d°C, Humidity: %d%\n", sv->temperature, sv->humidity);
 }
 
 // 4. Flame sensor
@@ -206,7 +214,7 @@ void body_flame(SharedVariable *sv)
         sv->gasOn = HIGH;
     }
 
-    printf("4. flame detection value: %d\n", flame);
+    printf("4. Flame detection value: %d\n", flame);
 }
 
 // 5. SMD RGB LED
@@ -218,7 +226,7 @@ void body_rgbcolor(SharedVariable *sv)
         WRITE(PIN_SMD_RED, 0x80);
         WRITE(PIN_SMD_GRN, 0xff);
         WRITE(PIN_SMD_BLU, 0x00);
-        printf("5. SMD RGB LED: green\n");
+        printf("5. SMD RGB LED: Green\n");
     }
 
     // Air quality: yellow
@@ -227,7 +235,7 @@ void body_rgbcolor(SharedVariable *sv)
         WRITE(PIN_SMD_RED, 0x00);
         WRITE(PIN_SMD_GRN, 0x00);
         WRITE(PIN_SMD_BLU, 0xFF);
-        printf("5. SMD RGB LED: blue\n");
+        printf("5. SMD RGB LED: Blue\n");
     }
 
     else if (sv->pm2_5 < 45)
@@ -235,7 +243,7 @@ void body_rgbcolor(SharedVariable *sv)
         WRITE(PIN_SMD_RED, 0xFF);
         WRITE(PIN_SMD_GRN, 0xA0);
         WRITE(PIN_SMD_BLU, 0x00);
-        printf("5. SMD RGB LED: yellow\n");
+        printf("5. SMD RGB LED: Yellow\n");
     }
 
     else
@@ -243,7 +251,7 @@ void body_rgbcolor(SharedVariable *sv)
         WRITE(PIN_SMD_RED, 0xFF);
         WRITE(PIN_SMD_GRN, 0x00);
         WRITE(PIN_SMD_BLU, 0x00);
-        printf("5. SMD RGB LED: red\n");
+        printf("5. SMD RGB LED: Red\n");
     }
 
 }
@@ -254,13 +262,13 @@ void body_buzzer(SharedVariable *sv)
 
     if (sv->button == PAUSE) {
         softToneWrite(PIN_BUZZER, 0);
-        printf("6. Buzzer off\n");
+        printf("6. Buzzer: Off\n");
     }
 
     else if (sv->gasOn == HIGH || sv->flameOn == HIGH) {
         softToneWrite(PIN_BUZZER, 1000);
         //sv->button == RUNNING;
-        printf("6. Buzzer On\n");
+        printf("6. Buzzer: On\n");
     }
 
 }
@@ -292,7 +300,7 @@ void body_display(SharedVariable *sv)
         write_data(20, 1, "Flame: Detected!"); 
     }
 
-    printf("6. Displaying temperature & humidity, and hazardous gas and flame status\n");
+    printf("7. Displaying temperature & humidity, and hazardous gas and flame status\n");
 }
 
 // 8. Button
