@@ -1,9 +1,13 @@
 /*
-Name:
-Email:
-Date:
+Description:
+-Work threads function for final project of CSE 147 WI25
+-Adapted from the individual assignment part 2
+Name: Ziying (Mark) Yan & Diyou Wang
+Email: z7yan@ucsd.edu & diw011@ucsd.edu
+Date: 3/11/2025
 */
-#include "assignment1.h"
+
+#include "work_threads.h"
 #include <stdio.h>
 //#include <stdlib.h>
 //#include <string.h>
@@ -13,8 +17,9 @@ Date:
 //#include <dht.h>
 //#include "MQ135.h"
 
-#include<wiringSerial.h>
+#include <wiringSerial.h>
 #include <unistd.h>
+#include "lcd2004_lib.c"
 
 #define MAX_TIMINGS 85
 #define SERIAL_PORT "/dev/ttyAMA0" // UART Serial Port on Raspberry Pi
@@ -28,7 +33,8 @@ void init_shared_variable(SharedVariable *sv)
     sv->pm2_5 = 0;
     sv->pm10 = 0;
     sv->button = PAUSE;
-    sv->buzzerOn = 0;
+    sv->gasOn = LOW;
+    sv->flameOn = LOW;
 }
 
 void ledInit(void) {
@@ -54,7 +60,9 @@ void init_sensors(SharedVariable* sv) {
     pinMode(PIN_BUTTON, INPUT);
     pinMode(PIN_BUTTON, INPUT);
 
-    
+    //init LCD display
+    fd = wiringPiI2CSetup(LCDAddr);
+    init();
 }
 // -------- Helper Functions --------
 
@@ -156,27 +164,32 @@ int readDHT11(int pin, int *temperature, int *humidity) {
 void body_haza_gas(SharedVariable *sv)
 {   
     int ppm = READ(PIN_HAZA_GAS);
+
+    if (ppm == LOW)
+    {
+        sv->gasOn = HIGH;
+    }
+
     printf("1. The hazardous gas value is: %d\n", ppm);
 }
 
 // 2. PM2.5/PM10 sensor
 void body_PM25(SharedVariable *sv)
 {
-
     // Open serial port
     int fd = serialOpen(SERIAL_PORT, 9600);
+
     if (fd < 0)
     {
         fprintf(stderr, "Error opening serial port\n");
     }
-
+    
     //printf("Reading MS5003 sensor data...\n");
     read_pms5003(fd, &sv->pm1_0, &sv->pm2_5, &sv->pm10);
     printf("2. PM1.0: %d µg/m³, PM2.5: %d µg/m³, PM10: %d µg/m³\n", sv->pm1_0, sv->pm2_5, sv->pm10);
 
     // Close serial port
     serialClose(fd);
-
 }
 
 // 3. DHT11 temperature& humidity sensor
@@ -189,8 +202,14 @@ void body_temp_hum(SharedVariable *sv)
 // 4. Flame sensor
 void body_flame(SharedVariable *sv)
 {
-    sv->flameOn = READ(PIN_FLAME);
-    printf("4. flame detection value: %d\n", sv->flameOn);
+    int flame = READ(PIN_FLAME);
+
+    if (flame == HIGH)
+    {
+        sv->gasOn = HIGH;
+    }
+
+    printf("4. flame detection value: %d\n", flame);
 }
 
 // 5. SMD RGB LED (Surface Mount Device)
@@ -206,7 +225,7 @@ void body_rgbcolor(SharedVariable *sv)
     }
 
     // Air quality: yellow
-    else if (sv->pm2_5 < 35)
+    else if (sv->pm2_5 < 25)
     {
         WRITE(PIN_SMD_RED, 0x00);
         WRITE(PIN_SMD_GRN, 0x00);
@@ -214,7 +233,7 @@ void body_rgbcolor(SharedVariable *sv)
         printf("5. SMD RGB LED: blue\n");
     }
 
-    else if (sv->pm2_5 < 55)
+    else if (sv->pm2_5 < 45)
     {
         WRITE(PIN_SMD_RED, 0xFF);
         WRITE(PIN_SMD_GRN, 0xA0);
@@ -236,13 +255,15 @@ void body_rgbcolor(SharedVariable *sv)
 void body_buzzer(SharedVariable *sv)
 {
 
-    if (sv->button == RUNNING) {
-        softToneWrite(PIN_BUZZER, 0);
-        printf("6. Buzzer On\n");
-    }
-    else{
+    if (sv->button == PAUSE) {
         softToneWrite(PIN_BUZZER, 0);
         printf("6. Buzzer off\n");
+    }
+
+    else if (sv->gasOn == HIGH || sv->flameOn == HIGH) {
+        softToneWrite(PIN_BUZZER, 1000);
+        //sv->button == RUNNING;
+        printf("6. Buzzer On\n");
     }
 
 }
@@ -250,7 +271,31 @@ void body_buzzer(SharedVariable *sv)
 // 7. LCD display
 void body_display(SharedVariable *sv)
 {
+    
+    char msg1[30];
+    sprintf(msg1, "Temperature: %d", sv->temperature);
+    
+    char msg2[30];
+    sprintf(msg2, "Humidity: %d", sv->humidity);
+    
+    write_data(0, 0, msg1);
+    write_data(0, 1, msg2);
 
+    if (sv->gasOn == LOW){
+        write_data(20, 0, "Gas: Safe");
+    }
+    else {
+        write_data(20, 0, "Gas: Detected!");
+    }    
+    
+    if (sv->flameOn == LOW){
+        write_data(20, 1, "Flame: Safe");
+    }
+    else {
+        write_data(20, 1, "Flame: Detected!"); 
+    }
+
+    printf("6. Displaying temperature & humidity, and hazardous gas and flame status\n");
 }
 
 // 8. Button
@@ -258,17 +303,18 @@ void body_button(SharedVariable *sv)
 {
     int buttonRead = READ(PIN_BUTTON);
     static int lastRead = HIGH;
+    
 
     if (lastRead == LOW && buttonRead == HIGH) {
         if (sv->button == RUNNING) {
             sv->button = PAUSE;
             printf("8. Button pressed: PAUSE\n");
-        } else {
+        } 
+        else {
             sv->button = RUNNING;
             printf("8. Button pressed: RUNNING\n");
         }
 
     }
-
     lastRead = buttonRead;
 }

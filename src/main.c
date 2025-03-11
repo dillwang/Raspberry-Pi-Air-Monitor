@@ -1,15 +1,17 @@
-// Important! DO NOT MODIFY this file.
-// You will not submit this file.
-// This file is provided for your understanding of the program procedure.
-
-// Skeleton code of CSE237A, Sensor interaction
-// For more details, please see the instructions on the class website.
+/*
+Description:
+-Main loop function for final project of CSE 147 WI25.
+-Adapted from the individual assignment part 2
+Name: Ziying (Mark) Yan & Diyou Wang
+Email: z7yan@ucsd.edu & diw011@ucsd.edu
+Date: 3/11/2025
+*/
 
 #include <stdio.h>
 #include <pthread.h>
 #include <wiringPi.h>
 #include <softPwm.h>
-#include "assignment1.h"
+#include "work_threads.h"
 
 // Thread declaration macros
 #define thread_decl(NAME) \

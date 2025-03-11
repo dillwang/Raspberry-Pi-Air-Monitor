@@ -1,8 +1,10 @@
 /*
 Description:
-Name:
-Email:
-Date:
+-Work threads function declaration for final project of CSE 147 WI25
+-Adapted from the individual assignment part 2
+Name: Ziying (Mark) Yan & Diyou Wang
+Email: z7yan@ucsd.edu & diw011@ucsd.edu
+Date: 3/11/2025
 */
 
 #ifndef _ASSIGNMENT_BODY_
@@ -46,7 +48,7 @@ Date:
 #define PIN_PM25_TXD 15
 
 // 3. DHT11 temperature& humidity sensor
-#define PIN_TEMP_HUM 9
+#define PIN_TEMP_HUM 2
 
 // 4. Flame sensor
 #define PIN_FLAME 7
@@ -72,7 +74,7 @@ typedef struct shared_variable {
     int pm2_5;
     int pm10;
     int button;
-    int buzzerOn;
+    int gasOn;
     int flameOn;
 
 } SharedVariable;

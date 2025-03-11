@@ -1,5 +1,5 @@
 all:
-	gcc -o main_section1 main_section1.c assignment1.c -lwiringPi -lpthread
+	gcc -o main main.c work_threads.c -lwiringPi -lpthread
 
 clean:
-	rm -rf main_section1
+	rm -rf main
