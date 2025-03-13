@@ -54,8 +54,8 @@ Date: 3/11/2025
 #define PIN_FLAME 7
 
 // 5. SMD RGB LED (Surface Mount Device)
-#define PIN_SMD_RED 27
-#define PIN_SMD_GRN 28
+#define PIN_SMD_RED 28
+#define PIN_SMD_GRN 27
 #define PIN_SMD_BLU 29
 
 // 6. Passive Buzzer

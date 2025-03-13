@@ -170,9 +170,13 @@ void body_haza_gas(SharedVariable *sv)
         ppm = 1;
     }
 
-    if (ppm == LOW)
+    if (ppm == HIGH)
     {
         sv->gasOn = HIGH;
+    }
+    else
+    {
+        sv->gasOn = LOW;
     }
 
     printf("1. The hazardous gas value is: %d\n", ppm);
@@ -223,37 +227,38 @@ void body_rgbcolor(SharedVariable *sv)
     // Air quality: green
     if (sv->pm2_5 < 10)
     {
-        WRITE(PIN_SMD_RED, 0x80);
+        WRITE(PIN_SMD_RED, 0x00);
         WRITE(PIN_SMD_GRN, 0xff);
         WRITE(PIN_SMD_BLU, 0x00);
         printf("5. SMD RGB LED: Green\n");
     }
 
-    // Air quality: yellow
-    else if (sv->pm2_5 < 25)
+    // Air quality: blue
+    if (sv->pm2_5 >= 10 && sv->pm2_5 < 20)
     {
         WRITE(PIN_SMD_RED, 0x00);
         WRITE(PIN_SMD_GRN, 0x00);
-        WRITE(PIN_SMD_BLU, 0xFF);
+        WRITE(PIN_SMD_BLU, 0xff);
         printf("5. SMD RGB LED: Blue\n");
     }
 
-    else if (sv->pm2_5 < 45)
+    // Air quality: yellow
+    if (sv->pm2_5 >= 20 && sv->pm2_5 < 30)
     {
-        WRITE(PIN_SMD_RED, 0xFF);
-        WRITE(PIN_SMD_GRN, 0xA0);
+        WRITE(PIN_SMD_RED, 0x80);
+        WRITE(PIN_SMD_GRN, 0xff);
         WRITE(PIN_SMD_BLU, 0x00);
         printf("5. SMD RGB LED: Yellow\n");
     }
 
-    else
+    // Air quality: red
+    if (sv->pm2_5 >= 30)    
     {
-        WRITE(PIN_SMD_RED, 0xFF);
+        WRITE(PIN_SMD_RED, 0xff);
         WRITE(PIN_SMD_GRN, 0x00);
         WRITE(PIN_SMD_BLU, 0x00);
         printf("5. SMD RGB LED: Red\n");
     }
-
 }
 
 // 6. Passive Buzzer
@@ -276,6 +281,7 @@ void body_buzzer(SharedVariable *sv)
 // 7. LCD display
 void body_display(SharedVariable *sv)
 {
+    clear();
     
     char msg1[30];
     sprintf(msg1, "Temperature: %d", sv->temperature);

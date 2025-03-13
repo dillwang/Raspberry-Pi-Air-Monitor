@@ -10,7 +10,7 @@ This project is an air quality monitoring system using the Raspberry Pi 5. It in
 - **Flame Sensor**: Detects fire hazards and triggers an alarm.
 - **RGB LED Indicator**: Displays different colors based on air quality levels.
 - **Buzzer Alarm**: Provides an audible alert for hazardous conditions.
-- **LCD Display (I2C 20x4)**: Shows real-time sensor readings and status messages.
+- **LCD Display**: Shows real-time sensor readings and status messages.
 - **User Control Button**: Allows toggling between active monitoring and pause mode.
 
 ## Hardware Requirements
@@ -62,13 +62,14 @@ This project is an air quality monitoring system using the Raspberry Pi 5. It in
 - `Makefile` - Compilation instructions.
 
 ## How It Works
-- On startup, the program initializes sensors and starts multiple threads for each sensor.
-- Each thread reads sensor data and updates a shared structure (`SharedVariable`).
-- Based on the readings:
-  - The RGB LED changes color.
-  - The buzzer activates if hazardous conditions are detected.
-  - The LCD updates real-time readings.
-- The user can press a button to pause or resume monitoring.
+  - item On startup, the program initializes sensors and starts multiple threads for each sensor. For GPIO pins, sensors are set as INPUT, and actuators as OUTPUT. For serial and I2C, each of them are initialized with an access address.
+  - item When running, each thread reads sensor data and updates sv (shared variable).
+  - item Based on the reading of the sensor (1,2,3,4), the actuators (5,6,7,8) has the following response:
+    - item The RGB LED changes color based on the level of PM2.5 concentration. Based on the hazard level, it changes from green, blue, yellow, to red.
+    - item The buzzer activates if hazardous gas or flame is detected
+    - item The LCD updates real-time reading of temperature & humidity, and the status of hazardous gas & flame detection.
+    - item A button can be pressed to mute the buzzer if it is accidentally triggered.
+
 
 ## Expected Output
 ```
@@ -96,7 +97,7 @@ This project is an air quality monitoring system using the Raspberry Pi 5. It in
 - **Diyou Wang** - [Contact: diw011@ucsd.edu]
 
 ## Acknowledgments
-- Sunfounder for LCD library support.
-- Raspberry Pi community for GPIO handling resources.
+- Sunfounder for LCD library.
+- Raspberry Pi community for GPIO handling.
 - The code is adapted from the individual assignment part 2, with many new features and modified logic.
 
