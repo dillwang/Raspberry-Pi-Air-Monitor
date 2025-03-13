@@ -215,7 +215,10 @@ void body_flame(SharedVariable *sv)
 
     if (flame == HIGH)
     {
-        sv->gasOn = HIGH;
+        sv->flameOn = HIGH;
+    }
+    else{
+        sv->flameOn = LOW;
     }
 
     printf("4. Flame detection value: %d\n", flame);
